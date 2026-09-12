@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3C SMP | LifeSteal & Hardcore SMP</title>
+    <title>3C SMP | Tech Economy Network</title>
     <style>
         :root {
-            --primary: #ff3377;       /* Donut Pink */
-            --secondary: #8a2be2;     /* Neon Purple */
-            --accent: #ffb700;        /* Gold / Sprinkle Accent */
-            --bg-dark: #090511;       /* Deep Cosmic Purple-Black */
-            --panel-bg: rgba(22, 13, 38, 0.75);
-            --panel-border: rgba(255, 51, 119, 0.25);
-            --text-main: #d4ceeb;
-            --text-light: #ffffff;
+            --cyan: #00f3ff;          /* Cyber Neon Cyan */
+            --green: #00ff66;         /* Matrix Tech Green */
+            --purple: #b026ff;        /* Neon Purple */
+            --bg-dark: #030712;       /* Cyber Dark Navy */
+            --panel-bg: rgba(8, 15, 30, 0.85);
+            --panel-border: rgba(0, 243, 255, 0.3);
+            --text-main: #94a3b8;
+            --text-light: #f8fafc;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            font-family: 'Consolas', 'Fira Code', 'Segoe UI', monospace;
             scroll-behavior: smooth;
         }
 
@@ -31,7 +31,7 @@
             overflow-x: hidden;
         }
 
-        /* Dynamic Canvas Background */
+        /* Matrix / Code Stream Background Canvas */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -39,39 +39,61 @@
             width: 100vw;
             height: 100vh;
             z-index: -1;
-            background: radial-gradient(circle at 50% 30%, #1a0b33 0%, #06030a 100%);
+            background: radial-gradient(circle at 50% 40%, #091328 0%, #02040a 100%);
         }
 
-        /* Keyframe Animations */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-12px) rotate(2deg); }
+        /* Scanline Overlay Effect */
+        .scanline-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 0, 0, 0.3) 50%,
+                rgba(0, 0, 0, 0.3)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 99;
+            opacity: 0.6;
         }
 
-        @keyframes shimmer {
+        /* Animations */
+        @keyframes cyberPulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(0, 243, 255, 0.4), inset 0 0 10px rgba(0, 243, 255, 0.2); }
+            50% { box-shadow: 0 0 35px rgba(0, 243, 255, 0.8), inset 0 0 20px rgba(0, 243, 255, 0.5); }
+        }
+
+        @keyframes borderRotate {
+            0% { border-color: var(--cyan); }
+            33% { border-color: var(--green); }
+            66% { border-color: var(--purple); }
+            100% { border-color: var(--cyan); }
+        }
+
+        @keyframes textShimmer {
             0% { background-position: -200% center; }
             100% { background-position: 200% center; }
         }
 
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 15px rgba(255, 51, 119, 0.4), inset 0 0 10px rgba(255, 51, 119, 0.2); }
-            50% { box-shadow: 0 0 35px rgba(255, 51, 119, 0.8), inset 0 0 20px rgba(255, 51, 119, 0.4); }
+        @keyframes liveDot {
+            0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.8); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(0, 255, 102, 0); }
+            100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0); }
         }
 
-        @keyframes livePulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
-        }
-
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(1000%); }
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
         }
 
         /* Navigation Bar */
         nav {
-            background-color: rgba(9, 5, 17, 0.85);
+            background-color: rgba(3, 7, 18, 0.9);
             padding: 1.2rem 8%;
             display: flex;
             justify-content: space-between;
@@ -81,52 +103,62 @@
             z-index: 100;
             border-bottom: 1px solid var(--panel-border);
             backdrop-filter: blur(15px);
-            transition: all 0.3s ease;
+            animation: borderRotate 8s infinite linear;
         }
 
         .logo {
-            font-size: 1.9rem;
+            font-size: 1.8rem;
             font-weight: 900;
             color: var(--text-light);
             text-transform: uppercase;
             letter-spacing: 3px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .logo-icon {
             display: inline-block;
             width: 28px;
             height: 28px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 50%;
-            border: 3px solid #fff;
-            box-shadow: 0 0 12px var(--primary);
-            animation: float 4s ease-in-out infinite;
+            background: transparent;
+            border: 3px solid var(--cyan);
+            border-radius: 6px;
+            box-shadow: 0 0 15px var(--cyan);
+            animation: floatIcon 3s ease-in-out infinite;
+            position: relative;
+        }
+
+        .logo-icon::before {
+            content: '</>';
+            position: absolute;
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--green);
+            top: 2px;
+            left: 2px;
         }
 
         .logo span {
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--cyan);
+            text-shadow: 0 0 10px var(--cyan);
         }
 
         .nav-links {
             list-style: none;
             display: flex;
-            gap: 2.2rem;
+            gap: 2rem;
         }
 
         .nav-links a {
             color: var(--text-main);
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
             position: relative;
-            padding: 5px 0;
+            padding: 6px 0;
             transition: color 0.3s ease;
         }
 
@@ -137,45 +169,45 @@
             left: 0;
             width: 0%;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
+            background: linear-gradient(90deg, var(--cyan), var(--green));
             transition: width 0.3s ease;
-            border-radius: 2px;
+            box-shadow: 0 0 8px var(--cyan);
         }
 
         .nav-links a:hover {
-            color: var(--text-light);
+            color: var(--cyan);
         }
 
         .nav-links a:hover::after {
             width: 100%;
         }
 
-        /* Live Player Badge */
+        /* Status Badge */
         .status-badge {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            padding: 8px 18px;
-            border-radius: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--green);
+            padding: 8px 20px;
+            border-radius: 4px;
             font-size: 0.85rem;
             font-weight: 800;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin-bottom: 1.5rem;
-            backdrop-filter: blur(5px);
+            margin-bottom: 1.8rem;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
         }
 
         .status-dot {
             width: 10px;
             height: 10px;
-            background-color: #00ff88;
+            background-color: var(--green);
             border-radius: 50%;
-            animation: livePulse 2s infinite;
+            animation: liveDot 2s infinite;
         }
 
-        /* Hero Section */
+        /* Hero Header */
         header {
             min-height: 88vh;
             display: flex;
@@ -188,26 +220,26 @@
         }
 
         header h1 {
-            font-size: clamp(3rem, 7vw, 6rem);
+            font-size: clamp(2.8rem, 6.5vw, 5.5rem);
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 4px;
+            letter-spacing: 5px;
             line-height: 1.1;
             margin-bottom: 1.2rem;
-            background: linear-gradient(90deg, #ffffff, var(--primary), var(--accent), #ffffff);
+            background: linear-gradient(90deg, #ffffff, var(--cyan), var(--green), #ffffff);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: shimmer 4s linear infinite;
-            filter: drop-shadow(0 0 25px rgba(255, 51, 119, 0.5));
+            animation: textShimmer 5s linear infinite;
+            filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.5));
         }
 
         header p {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             margin-bottom: 2.5rem;
-            max-width: 680px;
+            max-width: 720px;
             color: var(--text-main);
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.9);
         }
 
         /* Buttons */
@@ -223,42 +255,58 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 16px 42px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: var(--text-light);
+            padding: 16px 40px;
+            background: rgba(0, 243, 255, 0.1);
+            color: var(--cyan);
             text-decoration: none;
-            font-size: 1rem;
+            font-size: 0.95rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            border-radius: 50px;
-            font-weight: 800;
-            overflow: hidden;
-            border: none;
+            border-radius: 4px;
+            font-weight: 900;
+            border: 1px solid var(--cyan);
             cursor: pointer;
-            animation: pulseGlow 3s infinite;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: cyberPulse 3s infinite;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:hover {
-            transform: translateY(-5px) scale(1.03);
-            background: linear-gradient(135deg, #ff4d8d, #9d4edd);
+            transform: translateY(-4px);
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 30px var(--cyan);
         }
 
         .btn-discord {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-color: var(--purple);
+            color: var(--purple);
+            background: rgba(176, 38, 255, 0.1);
             animation: none;
-            box-shadow: none;
         }
 
         .btn-discord:hover {
-            background: #ffffff;
-            color: #000000;
-            border-color: #ffffff;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+            background: var(--purple);
+            color: #fff;
+            box-shadow: 0 0 30px var(--purple);
         }
 
-        /* Sections */
+        /* Section Setup */
         .section {
             padding: 6rem 10%;
             position: relative;
@@ -266,7 +314,7 @@
 
         .section-title {
             text-align: center;
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             font-weight: 900;
             margin-bottom: 3.5rem;
             color: var(--text-light);
@@ -275,11 +323,11 @@
         }
 
         .section-title span {
-            color: var(--primary);
-            text-shadow: 0 0 15px rgba(255, 51, 119, 0.6);
+            color: var(--green);
+            text-shadow: 0 0 15px var(--green);
         }
 
-        /* Animated Feature Cards */
+        /* Animated Tech Feature Cards */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -290,65 +338,66 @@
             background: var(--panel-bg);
             backdrop-filter: blur(12px);
             padding: 3rem 2rem;
-            border-radius: 16px;
+            border-radius: 8px;
             border: 1px solid var(--panel-border);
-            text-align: center;
+            text-align: left;
             position: relative;
             overflow: hidden;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
         }
 
-        .feature-card::before {
+        .feature-card::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-            transition: left 0.6s ease;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--cyan), var(--green));
+            transition: width 0.4s ease;
         }
 
-        .feature-card:hover::before {
-            left: 100%;
+        .feature-card:hover::after {
+            width: 100%;
         }
 
         .feature-card:hover {
-            transform: translateY(-12px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(255, 51, 119, 0.25);
+            transform: translateY(-8px);
+            border-color: var(--cyan);
+            box-shadow: 0 15px 35px rgba(0, 243, 255, 0.2);
         }
 
         .card-icon {
-            font-size: 3rem;
+            font-size: 2.8rem;
             margin-bottom: 1.2rem;
             display: inline-block;
-            transition: transform 0.4s ease;
-        }
-
-        .feature-card:hover .card-icon {
-            transform: scale(1.2) rotate(10deg);
+            animation: floatIcon 4s ease-in-out infinite;
         }
 
         .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
             color: var(--text-light);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        /* Animated Directives Box */
+        .feature-card p {
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        /* Animated System Directives Box */
         .rules-box {
             max-width: 850px;
             margin: 0 auto;
             background: var(--panel-bg);
             backdrop-filter: blur(12px);
             padding: 3.5rem;
-            border-radius: 20px;
+            border-radius: 8px;
             border: 1px solid var(--panel-border);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
             position: relative;
         }
 
@@ -358,28 +407,30 @@
 
         .rules-box li {
             margin-bottom: 22px;
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             position: relative;
-            padding-left: 40px;
+            padding-left: 45px;
             color: var(--text-main);
             transition: transform 0.3s ease, color 0.3s ease;
         }
 
         .rules-box li:hover {
-            transform: translateX(8px);
+            transform: translateX(10px);
             color: var(--text-light);
         }
 
         .rules-box li::before {
-            content: '⚡';
+            content: '{Code}';
             position: absolute;
             left: 0;
-            top: -2px;
-            font-size: 1.2rem;
-            filter: drop-shadow(0 0 8px var(--primary));
+            top: 0;
+            font-size: 0.85rem;
+            color: var(--green);
+            font-weight: bold;
+            text-shadow: 0 0 8px var(--green);
         }
 
-        /* Interactive IP Cards */
+        /* Interactive Terminal IP Cards */
         .ip-container {
             display: flex;
             justify-content: center;
@@ -390,12 +441,12 @@
         }
 
         .ip-box {
-            background: rgba(12, 6, 24, 0.9);
+            background: rgba(4, 9, 20, 0.95);
             backdrop-filter: blur(10px);
             padding: 28px 40px;
-            border-radius: 16px;
+            border-radius: 8px;
             min-width: 320px;
-            border: 2px solid var(--panel-border);
+            border: 1px solid var(--panel-border);
             text-align: left;
             position: relative;
             cursor: pointer;
@@ -404,42 +455,47 @@
         }
 
         .ip-box:hover {
-            border-color: var(--accent);
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 10px 30px rgba(255, 183, 0, 0.3);
+            border-color: var(--green);
+            transform: translateY(-6px);
+            box-shadow: 0 10px 30px rgba(0, 255, 102, 0.25);
         }
 
         .ip-box span {
             display: block;
-            color: #a090c0;
-            font-size: 0.85rem;
+            color: var(--cyan);
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 8px;
-            font-weight: 800;
+            font-weight: bold;
         }
 
         .ip-text {
             color: var(--text-light);
             font-weight: 900;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             letter-spacing: 1px;
         }
 
         .ip-port {
-            color: var(--accent);
-            font-size: 1.1rem;
+            color: var(--green);
+            font-size: 1rem;
             font-weight: bold;
         }
 
         .click-hint {
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 12px;
             font-size: 0.75rem;
-            color: var(--primary);
+            color: var(--text-main);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .ip-box:hover .click-hint {
+            color: var(--green);
         }
 
         /* Toast Popup */
@@ -447,22 +503,22 @@
             position: fixed;
             bottom: 40px;
             right: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: #ffffff;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            color: #000000;
             padding: 16px 32px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            border-radius: 50px;
+            border-radius: 4px;
             display: none;
-            box-shadow: 0 10px 30px rgba(255, 51, 119, 0.6);
+            box-shadow: 0 10px 30px rgba(0, 243, 255, 0.6);
             z-index: 1000;
-            animation: float 2s infinite ease-in-out;
+            animation: floatIcon 2s infinite ease-in-out;
         }
 
         /* Footer */
         footer {
-            background-color: rgba(4, 2, 8, 0.95);
+            background-color: rgba(2, 4, 10, 0.95);
             text-align: center;
             padding: 3.5rem 2rem;
             border-top: 1px solid var(--panel-border);
@@ -479,179 +535,151 @@
 </head>
 <body>
 
-    <!-- Particle Background -->
+    <!-- Scanline Effect -->
+    <div class="scanline-overlay"></div>
+
+    <!-- Binary/Matrix Rain Background -->
     <canvas id="bg-canvas"></canvas>
 
     <!-- Copy Notification -->
-    <div id="toast" class="copy-toast">✨ IP Copied to Clipboard!</div>
+    <div id="toast" class="copy-toast">&gt; IP_COPIED_TO_CLIPBOARD</div>
 
-    <!-- Navigation -->
+    <!-- Navigation Bar -->
     <nav>
         <div class="logo">
             <div class="logo-icon"></div>
-            3C <span>SMP</span>
+            3C <span>NETWORK</span>
         </div>
         <ul class="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#rules">Rules</a></li>
-            <li><a href="#join">Play Now</a></li>
+            <li><a href="#home">// Home</a></li>
+            <li><a href="#features">// Modules</a></li>
+            <li><a href="#rules">// Directives</a></li>
+            <li><a href="#join">// Connect</a></li>
         </ul>
     </nav>
 
-    <!-- Hero Banner -->
+    <!-- Hero Section -->
     <header id="home">
         <div class="status-badge">
             <div class="status-dot"></div>
-            Server Online &bull; 139.99.22.6:28810
+            SYSTEM ONLINE &bull; 139.99.22.6:28810
         </div>
-        <h1>STEAL HEARTS.<br>DOMINATE THE SMP.</h1>
-        <p>Inspired by Donut SMP & LifeSteal. Kill players to claim their hearts, build huge bases, trade on the economy, and rule the realm.</p>
+        <h1>AUTOMATE WEALTH.<br>CODE THE ECONOMY.</h1>
+        <p>A Donut SMP inspired tech-driven economy. Construct automated spawner networks, flip assets on algorithmic markets, and build the ultimate financial mainframe.</p>
         <div class="btn-group">
-            <a href="#join" class="btn">Join Server</a>
-            <a href="#" class="btn btn-discord">Discord Server</a>
+            <a href="#join" class="btn">&gt; INITIALIZE SESSION</a>
+            <a href="#" class="btn btn-discord">&gt; JOIN DISCORD</a>
         </div>
     </header>
 
     <!-- Features Section -->
     <section id="features" class="section">
-        <h2 class="section-title">Server <span>Features</span></h2>
+        <h2 class="section-title">Core <span>Modules</span></h2>
         <div class="features-grid">
             <div class="feature-card">
-                <div class="card-icon">💔</div>
-                <h3>LifeSteal System</h3>
-                <p>Eliminate rival players in combat to drain their max health hearts. Craft heart containers or trade them on the player market.</p>
+                <div class="card-icon">💻</div>
+                <h3>Algorithmic AH & Shops</h3>
+                <p>Run high-speed player markets, list items on the global auction house, and dominate player-driven automated commerce.</p>
             </div>
             <div class="feature-card">
-                <div class="card-icon">💎</div>
-                <h3>Player Economy</h3>
-                <p>Buy, sell, and trade items using live auction houses, player shops, and custom currency systems built for high-stakes trading.</p>
+                <div class="card-icon">⚡</div>
+                <h3>Automated Spawner Farms</h3>
+                <p>Deploy, stack, and optimize mob spawner farms. Scale up production lines to generate millions in virtual balance.</p>
             </div>
             <div class="feature-card">
-                <div class="card-icon">🛡️</div>
-                <h3>Claims & Raiding</h3>
-                <p>Protect your valuable storage using land claim blocks or challenge rival bases in brutal survival raiders action.</p>
+                <div class="card-icon">📊</div>
+                <h3>Live Data Leaderboards</h3>
+                <p>Track top wealth statistics in real-time with /baltop metrics and climb the server's balance hierarchy.</p>
             </div>
         </div>
     </section>
 
-    <!-- Rules Section -->
+    <!-- Rules / Directives Section -->
     <section id="rules" class="section">
-        <h2 class="section-title">Server <span>Rules</span></h2>
+        <h2 class="section-title">System <span>Directives</span></h2>
         <div class="rules-box">
             <ul>
-                <li><strong>LIFESTEAL MECHANICS:</strong> PvP combat is enabled everywhere outside spawn. Be ready to defend your hearts!</li>
-                <li><strong>NO CHEATING / HACKING:</strong> X-ray, auto-clickers, fly hacks, and combat mods result in an instant permanent ban.</li>
-                <li><strong>RAIDING ALLOWED:</strong> Unclaimed bases and chest rooms are fair game. Protect your stash with claim blocks!</li>
-                <li><strong>NO COMBAT LOGGING:</strong> Disconnecting while in combat will automatically result in heart loss and death.</li>
-                <li><strong>FAIR COMMUNITY:</strong> Maintain sportsmanship in public chat. Harassment and hate speech are strictly prohibited.</li>
+                <li><strong>CASUAL ECONOMY SMP:</strong> Non-hardcore environment. Keep your inventory, build freely, and focus on expanding your market.</li>
+                <li><strong>AUTOMATED TRADING:</strong> Use official `/trade` protocols or secure player shops to conduct safe financial transfers.</li>
+                <li><strong>ZERO EXPLOIT POLICY:</strong> Duplication glitches or market manipulation hacks will trigger an immediate auto-ban.</li>
+                <li><strong>BASE PROTECTION:</strong> Secure your high-value spawner setups and vaults using land claim protection modules.</li>
+                <li><strong>COMMUNITY PROTOCOL:</strong> Respectful behavior required in all public chat channels and discord logs.</li>
             </ul>
         </div>
     </section>
 
-    <!-- Join Section -->
+    <!-- Join / Connect Section -->
     <section id="join" class="section" style="text-align: center;">
-        <h2 class="section-title">Server <span>Connection</span></h2>
-        <p style="font-size: 1.1rem; color: var(--text-main); max-width: 600px; margin: 0 auto;">
-            Click on any card below to instant-copy the address and paste it directly into Minecraft.
+        <h2 class="section-title">Network <span>Endpoints</span></h2>
+        <p style="font-size: 1rem; color: var(--text-main); max-width: 600px; margin: 0 auto;">
+            Select a target terminal endpoint below to copy the connection protocol directly to your clipboard.
         </p>
         
         <div class="ip-container">
             <!-- Java IP -->
             <div class="ip-box" onclick="copyToClipboard('139.99.22.6:28810')">
-                <span>Java Edition IP</span>
+                <span>// JAVA PROTOCOL</span>
                 <div class="ip-text">139.99.22.6<span class="ip-port">:28810</span></div>
-                <div class="click-hint">Click to Copy Address</div>
+                <div class="click-hint">[ Click to Copy IP ]</div>
             </div>
 
             <!-- Bedrock IP -->
             <div class="ip-box" onclick="copyToClipboard('139.99.22.6')">
-                <span>Bedrock Edition IP & Port</span>
+                <span>// BEDROCK PROTOCOL</span>
                 <div class="ip-text">139.99.22.6</div>
-                <div class="ip-port" style="margin-top: 5px;">Port: 28810</div>
-                <div class="click-hint">Click to Copy Address</div>
+                <div class="ip-port" style="margin-top: 5px;">PORT: 28810</div>
+                <div class="click-hint">[ Click to Copy IP ]</div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <p style="color: var(--text-light); font-weight: bold;">&copy; 2026 3C SMP Network. All Rights Reserved.</p>
-        <p style="font-size: 0.85rem; color: #776e9c; margin-top: 8px;">Not affiliated with or endorsed by Mojang AB or Microsoft.</p>
+        <p style="color: var(--text-light); font-weight: bold;">&copy; 2026 3C TECH SMP NETWORK. ALL SYSTEMS OPERATIONAL.</p>
+        <p style="font-size: 0.85rem; color: #475569; margin-top: 8px;">Not affiliated with or endorsed by Mojang AB or Microsoft.</p>
     </footer>
 
-    <!-- Canvas Animation & JS -->
+    <!-- JS Canvas Script -->
     <script>
-        // Floating Sprinkle & Particle Background Animation
+        // Tech Matrix Code Stream Animation
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        const particles = [];
-        const colors = ['#ff3377', '#8a2be2', '#ffb700', '#ffffff', '#00ff88'];
+        const charSet = '01<>/$#{}=+*:;3C_';
+        const fontSize = 14;
+        const columns = Math.floor(canvas.width / fontSize);
+        const drops = Array(columns).fill(1);
 
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 6 + 2;
-                this.color = colors[Math.floor(Math.random() * colors.length)];
-                this.speedX = (Math.random() - 0.5) * 1.5;
-                this.speedY = (Math.random() - 0.5) * 1.5;
-                this.rotation = Math.random() * 360;
-                this.rotSpeed = (Math.random() - 0.5) * 2;
-                this.isSprinkle = Math.random() > 0.5;
-            }
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(2, 4, 10, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                this.rotation += this.rotSpeed;
+            ctx.fillStyle = '#00f3ff';
+            ctx.font = `${fontSize}px monospace`;
 
-                if (this.x < 0) this.x = canvas.width;
-                if (this.x > canvas.width) this.x = 0;
-                if (this.y < 0) this.y = canvas.height;
-                if (this.y > canvas.height) this.y = 0;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate((this.rotation * Math.PI) / 180);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.color;
-
-                if (this.isSprinkle) {
-                    // Donut Sprinkle Shape
-                    ctx.fillRect(-this.size, -this.size / 2, this.size * 2.5, this.size);
+            for (let i = 0; i < drops.length; i++) {
+                const text = charSet.charAt(Math.floor(Math.random() * charSet.length));
+                
+                // Alternate colors between Cyan and Matrix Green
+                if (Math.random() > 0.8) {
+                    ctx.fillStyle = '#00ff66';
                 } else {
-                    // Floating Circle
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size / 1.5, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.fillStyle = '#00f3ff';
                 }
 
-                ctx.restore();
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
             }
         }
 
-        for (let i = 0; i < 65; i++) {
-            particles.push(new Particle());
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach((p) => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animate);
-        }
-
-        animate();
+        setInterval(drawMatrix, 40);
 
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
