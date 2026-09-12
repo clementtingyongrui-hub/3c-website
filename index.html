@@ -4,45 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3C SMP | Tech Economy Network</title>
+    <!-- TIP 1: Google Fonts Anchor Pair (Space Grotesk + JetBrains Mono) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;0,800;1,400&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --cyan: #00f3ff;          /* Cyber Neon Cyan */
             --green: #00ff66;         /* Matrix Tech Green */
             --purple: #b026ff;        /* Neon Purple */
-            --bg-dark: #030712;       /* Cyber Dark Navy */
-            --panel-bg: rgba(8, 15, 30, 0.85);
+            --bg-dark: #02050e;       /* Deep Cyber Charcoal */
+            --panel-bg: rgba(8, 16, 32, 0.78);
             --panel-border: rgba(0, 243, 255, 0.3);
-            --text-main: #94a3b8;
-            --text-light: #f8fafc;
+            
+            /* TIP 1: Font Families */
+            --font-anchor: 'Space Grotesk', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+
+            /* TIP 5: Opacity Hierarchy Colors */
+            --text-high: rgba(248, 250, 252, 1);       /* 100% Opacity */
+            --text-med: rgba(148, 163, 184, 0.78);     /* ~78% Opacity */
+            --text-low: rgba(148, 163, 184, 0.52);     /* ~52% Opacity */
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Consolas', 'Fira Code', 'Segoe UI', monospace;
+            font-family: var(--font-code);
             scroll-behavior: smooth;
         }
 
         body, html {
             background-color: var(--bg-dark);
-            color: var(--text-light);
+            color: var(--text-high);
             line-height: 1.6;
             overflow-x: hidden;
         }
 
-        /* Matrix / Code Stream Background Canvas */
+        /* Live Matrix / Animated Code Stream Background */
         #bg-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -1;
-            background: radial-gradient(circle at 50% 40%, #091328 0%, #02040a 100%);
+            z-index: -2;
+            background: #02040a;
+            display: block;
         }
 
-        /* Scanline Overlay Effect */
+        /* TIP 4: Subtle Noise Grain & Scanline Overlay for Depth */
         .scanline-overlay {
             position: fixed;
             top: 0;
@@ -53,19 +66,19 @@
                 to bottom,
                 rgba(255,255,255,0),
                 rgba(255,255,255,0) 50%,
-                rgba(0, 0, 0, 0.3) 50%,
-                rgba(0, 0, 0, 0.3)
+                rgba(0, 0, 0, 0.28) 50%,
+                rgba(0, 0, 0, 0.28)
             );
             background-size: 100% 4px;
             pointer-events: none;
-            z-index: 99;
-            opacity: 0.6;
+            z-index: -1;
+            opacity: 0.55;
         }
 
-        /* Animations */
+        /* Keyframe Animations */
         @keyframes cyberPulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(0, 243, 255, 0.4), inset 0 0 10px rgba(0, 243, 255, 0.2); }
-            50% { box-shadow: 0 0 35px rgba(0, 243, 255, 0.8), inset 0 0 20px rgba(0, 243, 255, 0.5); }
+            0%, 100% { box-shadow: 0 0 15px rgba(0, 243, 255, 0.35), inset 0 0 10px rgba(0, 243, 255, 0.15); }
+            50% { box-shadow: 0 0 35px rgba(0, 243, 255, 0.8), inset 0 0 20px rgba(0, 243, 255, 0.4); }
         }
 
         @keyframes borderRotate {
@@ -88,12 +101,22 @@
 
         @keyframes floatIcon {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(5deg); }
+            50% { transform: translateY(-8px) rotate(4deg); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        @keyframes barGrow {
+            0%, 100% { height: 40%; }
+            50% { height: 85%; }
         }
 
         /* Navigation Bar */
         nav {
-            background-color: rgba(3, 7, 18, 0.9);
+            background-color: rgba(3, 7, 18, 0.88);
             padding: 1.2rem 8%;
             display: flex;
             justify-content: space-between;
@@ -102,16 +125,17 @@
             top: 0;
             z-index: 100;
             border-bottom: 1px solid var(--panel-border);
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(16px);
             animation: borderRotate 8s infinite linear;
         }
 
         .logo {
+            font-family: var(--font-anchor);
             font-size: 1.8rem;
             font-weight: 900;
-            color: var(--text-light);
+            color: var(--text-high);
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -119,10 +143,10 @@
 
         .logo-icon {
             display: inline-block;
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             background: transparent;
-            border: 3px solid var(--cyan);
+            border: 2px solid var(--cyan);
             border-radius: 6px;
             box-shadow: 0 0 15px var(--cyan);
             animation: floatIcon 3s ease-in-out infinite;
@@ -135,8 +159,8 @@
             font-size: 11px;
             font-weight: bold;
             color: var(--green);
-            top: 2px;
-            left: 2px;
+            top: 3px;
+            left: 3px;
         }
 
         .logo span {
@@ -151,9 +175,9 @@
         }
 
         .nav-links a {
-            color: var(--text-main);
+            color: var(--text-med);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -187,16 +211,16 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(2, 6, 16, 0.85);
             border: 1px solid var(--green);
-            padding: 8px 20px;
-            border-radius: 4px;
-            font-size: 0.85rem;
+            padding: 8px 22px;
+            border-radius: 50px;
+            font-size: 0.82rem;
             font-weight: 800;
             letter-spacing: 1.5px;
             text-transform: uppercase;
             margin-bottom: 1.8rem;
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
         }
 
         .status-dot {
@@ -209,45 +233,46 @@
 
         /* Hero Header */
         header {
-            min-height: 88vh;
+            padding: 5rem 20px 4rem 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 20px;
             position: relative;
+            z-index: 10;
         }
 
         header h1 {
+            font-family: var(--font-anchor);
             font-size: clamp(2.8rem, 6.5vw, 5.5rem);
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            line-height: 1.1;
+            letter-spacing: 2px;
+            line-height: 1.08;
             margin-bottom: 1.2rem;
             background: linear-gradient(90deg, #ffffff, var(--cyan), var(--green), #ffffff);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: textShimmer 5s linear infinite;
-            filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.5));
+            filter: drop-shadow(0 0 25px rgba(0, 243, 255, 0.45));
         }
 
+        /* TIP 5: Text Opacity Hierarchy */
         header p {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             margin-bottom: 2.5rem;
             max-width: 720px;
-            color: var(--text-main);
+            color: var(--text-med);
             text-shadow: 0 2px 10px rgba(0,0,0,0.9);
         }
 
-        /* Buttons */
+        /* Button Group */
         .btn-group {
             display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
             justify-content: center;
+            margin-bottom: 3.5rem;
         }
 
         .btn {
@@ -255,20 +280,21 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 16px 40px;
-            background: rgba(0, 243, 255, 0.1);
+            padding: 18px 48px;
+            background: rgba(0, 243, 255, 0.12);
             color: var(--cyan);
             text-decoration: none;
             font-size: 0.95rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: 900;
             border: 1px solid var(--cyan);
             cursor: pointer;
             animation: cyberPulse 3s infinite;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             overflow: hidden;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
         }
 
         .btn::before {
@@ -290,36 +316,141 @@
             transform: translateY(-4px);
             background: var(--cyan);
             color: #000;
-            box-shadow: 0 0 30px var(--cyan);
+            box-shadow: 0 0 35px var(--cyan);
         }
 
-        .btn-discord {
-            border-color: var(--purple);
-            color: var(--purple);
-            background: rgba(176, 38, 255, 0.1);
-            animation: none;
-        }
-
-        .btn-discord:hover {
-            background: var(--purple);
-            color: #fff;
-            box-shadow: 0 0 30px var(--purple);
-        }
-
-        /* Section Setup */
-        .section {
-            padding: 6rem 10%;
+        /* TIP 2: THE STAR OF THE SHOW - Mainframe Dashboard Graphic */
+        .star-show-container {
+            width: 100%;
+            max-width: 880px;
+            margin: 0 auto;
             position: relative;
         }
 
+        .star-glow-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 70%;
+            background: radial-gradient(ellipse at center, rgba(0, 243, 255, 0.25) 0%, rgba(0, 255, 102, 0.12) 50%, transparent 80%);
+            filter: blur(40px);
+            z-index: -1;
+            animation: pulseGlow 4s infinite ease-in-out;
+        }
+
+        /* TIP 4: Depth & Tangibility (Glassmorphism Frame) */
+        .hero-terminal-card {
+            background: rgba(6, 14, 28, 0.85);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            padding: 24px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.15);
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27c93f; }
+
+        .terminal-title {
+            font-size: 0.8rem;
+            color: var(--text-low);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .terminal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-box {
+            background: rgba(3, 8, 20, 0.7);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+        }
+
+        /* TIP 3: Visual Rhyming with Terminal Symbols */
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-family: var(--font-anchor);
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--text-high);
+        }
+
+        .stat-chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 45px;
+            margin-top: 10px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, var(--cyan), var(--green));
+            border-radius: 2px 2px 0 0;
+            opacity: 0.8;
+            animation: barGrow 3s infinite ease-in-out;
+        }
+
+        .chart-bar:nth-child(2) { animation-delay: 0.3s; }
+        .chart-bar:nth-child(3) { animation-delay: 0.6s; }
+        .chart-bar:nth-child(4) { animation-delay: 0.9s; }
+        .chart-bar:nth-child(5) { animation-delay: 1.2s; }
+
+        /* Section Layout */
+        .section {
+            padding: 6rem 10%;
+            position: relative;
+            z-index: 10;
+        }
+
         .section-title {
+            font-family: var(--font-anchor);
             text-align: center;
             font-size: 2.5rem;
             font-weight: 900;
             margin-bottom: 3.5rem;
-            color: var(--text-light);
+            color: var(--text-high);
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
         }
 
         .section-title span {
@@ -327,24 +458,25 @@
             text-shadow: 0 0 15px var(--green);
         }
 
-        /* Animated Tech Feature Cards */
+        /* Feature Cards */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2.5rem;
         }
 
+        /* TIP 4: Depth & Tangibility Card Design */
         .feature-card {
             background: var(--panel-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
             padding: 3rem 2rem;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid var(--panel-border);
             text-align: left;
             position: relative;
             overflow: hidden;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
         }
 
         .feature-card::after {
@@ -376,28 +508,29 @@
         }
 
         .feature-card h3 {
+            font-family: var(--font-anchor);
             font-size: 1.4rem;
             margin-bottom: 0.8rem;
-            color: var(--text-light);
+            color: var(--text-high);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .feature-card p {
-            color: var(--text-main);
+            color: var(--text-med);
             font-size: 0.95rem;
         }
 
-        /* Animated System Directives Box */
+        /* System Directives Box */
         .rules-box {
             max-width: 850px;
             margin: 0 auto;
             background: var(--panel-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
             padding: 3.5rem;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid var(--panel-border);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.1);
             position: relative;
         }
 
@@ -410,21 +543,22 @@
             font-size: 1.05rem;
             position: relative;
             padding-left: 45px;
-            color: var(--text-main);
+            color: var(--text-med);
             transition: transform 0.3s ease, color 0.3s ease;
         }
 
         .rules-box li:hover {
             transform: translateX(10px);
-            color: var(--text-light);
+            color: var(--text-high);
         }
 
+        /* TIP 3: Visual Rhyming with {Code} prefix */
         .rules-box li::before {
             content: '{Code}';
             position: absolute;
             left: 0;
             top: 0;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--green);
             font-weight: bold;
             text-shadow: 0 0 8px var(--green);
@@ -432,14 +566,14 @@
 
         .cmd-code {
             color: var(--cyan);
-            background: rgba(0, 243, 255, 0.1);
-            padding: 2px 8px;
+            background: rgba(0, 243, 255, 0.12);
+            padding: 3px 10px;
             border-radius: 4px;
             border: 1px solid rgba(0, 243, 255, 0.3);
             font-weight: bold;
         }
 
-        /* Interactive Terminal IP Cards */
+        /* Terminal IP Cards */
         .ip-container {
             display: flex;
             justify-content: center;
@@ -450,10 +584,10 @@
         }
 
         .ip-box {
-            background: rgba(4, 9, 20, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(4, 9, 20, 0.92);
+            backdrop-filter: blur(12px);
             padding: 28px 40px;
-            border-radius: 8px;
+            border-radius: 10px;
             min-width: 320px;
             border: 1px solid var(--panel-border);
             text-align: left;
@@ -461,12 +595,13 @@
             cursor: pointer;
             transition: all 0.4s ease;
             overflow: hidden;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
         }
 
         .ip-box:hover {
             border-color: var(--green);
             transform: translateY(-6px);
-            box-shadow: 0 10px 30px rgba(0, 255, 102, 0.25);
+            box-shadow: 0 12px 35px rgba(0, 255, 102, 0.25);
         }
 
         .ip-box span {
@@ -480,7 +615,8 @@
         }
 
         .ip-text {
-            color: var(--text-light);
+            font-family: var(--font-anchor);
+            color: var(--text-high);
             font-weight: 900;
             font-size: 1.4rem;
             letter-spacing: 1px;
@@ -496,7 +632,7 @@
             display: inline-block;
             margin-top: 12px;
             font-size: 0.75rem;
-            color: var(--text-main);
+            color: var(--text-low);
             text-transform: uppercase;
             letter-spacing: 1.5px;
             font-weight: bold;
@@ -507,7 +643,7 @@
             color: var(--green);
         }
 
-        /* Toast Popup */
+        /* Copy Toast Popup */
         .copy-toast {
             position: fixed;
             bottom: 40px;
@@ -518,7 +654,7 @@
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            border-radius: 4px;
+            border-radius: 6px;
             display: none;
             box-shadow: 0 10px 30px rgba(0, 243, 255, 0.6);
             z-index: 1000;
@@ -544,13 +680,13 @@
 </head>
 <body>
 
-    <!-- Scanline Effect -->
+    <!-- TIP 4: Subtle Scanline & Noise Depth Layer -->
     <div class="scanline-overlay"></div>
 
-    <!-- Binary/Matrix Rain Background -->
+    <!-- Live Animated Matrix Code Canvas Background -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- Copy Notification -->
+    <!-- Copy Notification Toast -->
     <div id="toast" class="copy-toast">&gt; IP_COPIED_TO_CLIPBOARD</div>
 
     <!-- Navigation Bar -->
@@ -569,15 +705,62 @@
 
     <!-- Hero Section -->
     <header id="home">
+        <!-- TIP 3: Visual Rhyming with Status Pill Badge -->
         <div class="status-badge">
             <div class="status-dot"></div>
             SYSTEM ONLINE &bull; 139.99.22.6:28810
         </div>
+        
+        <!-- TIP 1: Headline using Space Grotesk Anchor Font -->
         <h1>AUTOMATE WEALTH.<br>CODE THE ECONOMY.</h1>
         <p>A Donut SMP inspired tech-driven economy. Construct automated spawner networks, flip assets on algorithmic markets, and build the ultimate financial mainframe.</p>
+
         <div class="btn-group">
             <a href="#join" class="btn">&gt; INITIALIZE SESSION</a>
-            <a href="#" class="btn btn-discord">&gt; JOIN DISCORD</a>
+        </div>
+
+        <!-- TIP 2: THE STAR OF THE SHOW (Tech Mainframe Dashboard Element) -->
+        <div class="star-show-container">
+            <div class="star-glow-bg"></div>
+            <div class="hero-terminal-card">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                    <div class="terminal-title">3C_MAINFRAME_ECO_MONITOR v2.6</div>
+                </div>
+                <div class="terminal-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">// GLOBAL AH COMMERCE</div>
+                        <div class="stat-value">$1,429,800</div>
+                        <div class="stat-chart-bars">
+                            <div class="chart-bar"></div>
+                            <div class="chart-bar"></div>
+                            <div class="chart-bar"></div>
+                            <div class="chart-bar"></div>
+                            <div class="chart-bar"></div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">// ACTIVE SPAWNER NODES</div>
+                        <div class="stat-value">8,942 / sec</div>
+                        <div class="stat-chart-bars">
+                            <div class="chart-bar" style="background: var(--green);"></div>
+                            <div class="chart-bar" style="background: var(--green);"></div>
+                            <div class="chart-bar" style="background: var(--green);"></div>
+                            <div class="chart-bar" style="background: var(--green);"></div>
+                            <div class="chart-bar" style="background: var(--green);"></div>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">// MARKET INDEX</div>
+                        <div class="stat-value">+14.8%</div>
+                        <div style="font-size: 0.75rem; color: var(--green); margin-top: 15px;">▲ AUTOMATED BALTOP SYNC</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -610,8 +793,8 @@
             <ul>
                 <li><strong>CASUAL ECONOMY SMP:</strong> Non-hardcore environment. Keep your inventory, build freely, and focus on expanding your market.</li>
                 <li><strong>ZERO EXPLOIT POLICY:</strong> Duplication glitches or market manipulation hacks will trigger an immediate auto-ban.</li>
-                <li><strong>COMMUNITY PROTOCOL:</strong> Respectful behavior is required across all chat channels and network spaces.</li>
-                <li><strong>MAIN ECONOMY MENU:</strong> Use <span class="cmd-code">/eco</span> in-game to open the main economy menu and player market.</li>
+                <li><strong>COMMUNITY PROTOCOL:</strong> Respectful behavior required.</li>
+                <li><strong>SHOP:</strong> Use <span class="cmd-code">/eco</span> to open the main economy menu.</li>
             </ul>
         </div>
     </section>
@@ -619,7 +802,7 @@
     <!-- Join / Connect Section -->
     <section id="join" class="section" style="text-align: center;">
         <h2 class="section-title">Network <span>Endpoints</span></h2>
-        <p style="font-size: 1rem; color: var(--text-main); max-width: 600px; margin: 0 auto;">
+        <p style="font-size: 1rem; color: var(--text-med); max-width: 600px; margin: 0 auto;">
             Select a target terminal endpoint below to copy the connection protocol directly to your clipboard.
         </p>
         
@@ -643,37 +826,41 @@
 
     <!-- Footer -->
     <footer>
-        <p style="color: var(--text-light); font-weight: bold;">&copy; 2026 3C TECH SMP NETWORK. ALL SYSTEMS OPERATIONAL.</p>
-        <p style="font-size: 0.85rem; color: #475569; margin-top: 8px;">Not affiliated with or endorsed by Mojang AB or Microsoft.</p>
+        <p style="color: var(--text-high); font-weight: bold;">&copy; 2026 3C TECH SMP NETWORK. ALL SYSTEMS OPERATIONAL.</p>
+        <p style="font-size: 0.85rem; color: var(--text-low); margin-top: 8px;">Not affiliated with or endorsed by Mojang AB or Microsoft.</p>
     </footer>
 
-    <!-- JS Canvas Script -->
+    <!-- JS Canvas Script (Moving Matrix Rain Background) -->
     <script>
-        // Tech Matrix Code Stream Animation
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
 
-        const charSet = '01<>/$#{}=+*:;3C_';
-        const fontSize = 14;
-        const columns = Math.floor(canvas.width / fontSize);
-        const drops = Array(columns).fill(1);
+        // Code Stream Character Set
+        const charSet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>/$#{}=+*:;3C_';
+        const fontSize = 15;
+        let columns = Math.floor(canvas.width / fontSize);
+        let drops = Array(columns).fill(1);
 
         function drawMatrix() {
-            ctx.fillStyle = 'rgba(2, 4, 10, 0.15)';
+            ctx.fillStyle = 'rgba(2, 4, 10, 0.18)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = '#00f3ff';
             ctx.font = `${fontSize}px monospace`;
 
             for (let i = 0; i < drops.length; i++) {
                 const text = charSet.charAt(Math.floor(Math.random() * charSet.length));
                 
-                // Alternate colors between Cyan and Matrix Green
-                if (Math.random() > 0.8) {
+                if (Math.random() > 0.85) {
                     ctx.fillStyle = '#00ff66';
+                } else if (Math.random() > 0.96) {
+                    ctx.fillStyle = '#ffffff';
                 } else {
                     ctx.fillStyle = '#00f3ff';
                 }
@@ -687,12 +874,7 @@
             }
         }
 
-        setInterval(drawMatrix, 40);
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+        setInterval(drawMatrix, 33);
 
         // Click-to-Copy Function
         function copyToClipboard(text) {
