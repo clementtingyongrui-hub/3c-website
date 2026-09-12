@@ -3,836 +3,742 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3C SMP | Tech Economy Network</title>
-    <!-- TIP 1: Google Fonts Anchor Pair (Space Grotesk + JetBrains Mono) -->
+    <title>3C SMP | Next-Gen Tech Economy Network</title>
+    
+    <!-- Premium Fonts: Syne (Display), Outfit (Body), JetBrains Mono (Tech/IP) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;0,800;1,400&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Outfit:wght@300;400;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
-            --cyan: #00f3ff;          /* Cyber Neon Cyan */
-            --green: #00ff66;         /* Matrix Tech Green */
-            --purple: #b026ff;        /* Neon Purple */
-            --bg-dark: #02050e;       /* Deep Cyber Charcoal */
-            --panel-bg: rgba(8, 16, 32, 0.78);
-            --panel-border: rgba(0, 243, 255, 0.3);
+            --bg: #030712;
+            --surface-card: rgba(15, 23, 42, 0.65);
+            --surface-glass: rgba(15, 23, 42, 0.4);
+            --border-glow: rgba(0, 243, 255, 0.25);
+            --border-subtle: rgba(255, 255, 255, 0.08);
             
-            /* TIP 1: Font Families */
-            --font-anchor: 'Space Grotesk', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
+            --cyan: #00f3ff;
+            --cyan-glow: rgba(0, 243, 255, 0.4);
+            --green: #00ff66;
+            --pink-accent: #ff0055;
+            --gold: #ffb700;
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
 
-            /* TIP 5: Opacity Hierarchy Colors */
-            --text-high: rgba(248, 250, 252, 1);       /* 100% Opacity */
-            --text-med: rgba(148, 163, 184, 0.78);     /* ~78% Opacity */
-            --text-low: rgba(148, 163, 184, 0.52);     /* ~52% Opacity */
+            --font-head: 'Syne', sans-serif;
+            --font-body: 'Outfit', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: var(--font-code);
             scroll-behavior: smooth;
         }
 
-        body, html {
-            background-color: var(--bg-dark);
-            color: var(--text-high);
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-body);
             line-height: 1.6;
             overflow-x: hidden;
+            position: relative;
         }
 
-        /* Live Matrix / Animated Code Stream Background */
-        #bg-canvas {
+        /* --- BACKGROUND CANVAS & GRID --- */
+        #particleCanvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
             z-index: -2;
-            background: #02040a;
-            display: block;
+            pointer-events: none;
         }
 
-        /* TIP 4: Subtle Noise Grain & Scanline Overlay for Depth */
-        .scanline-overlay {
+        .grid-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(
-                to bottom,
-                rgba(255,255,255,0),
-                rgba(255,255,255,0) 50%,
-                rgba(0, 0, 0, 0.28) 50%,
-                rgba(0, 0, 0, 0.28)
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
+            background-image: 
+                linear-gradient(to right, rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
             z-index: -1;
-            opacity: 0.55;
+            pointer-events: none;
         }
 
-        /* Keyframe Animations */
-        @keyframes cyberPulse {
-            0%, 100% { box-shadow: 0 0 15px rgba(0, 243, 255, 0.35), inset 0 0 10px rgba(0, 243, 255, 0.15); }
-            50% { box-shadow: 0 0 35px rgba(0, 243, 255, 0.8), inset 0 0 20px rgba(0, 243, 255, 0.4); }
-        }
-
-        @keyframes borderRotate {
-            0% { border-color: var(--cyan); }
-            33% { border-color: var(--green); }
-            66% { border-color: var(--purple); }
-            100% { border-color: var(--cyan); }
-        }
-
-        @keyframes textShimmer {
-            0% { background-position: -200% center; }
-            100% { background-position: 200% center; }
-        }
-
-        @keyframes liveDot {
-            0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.8); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(0, 255, 102, 0); }
-            100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0); }
-        }
-
-        @keyframes floatIcon {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(4deg); }
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.05); }
-        }
-
-        @keyframes barGrow {
-            0%, 100% { height: 40%; }
-            50% { height: 85%; }
-        }
-
-        /* Navigation Bar */
+        /* --- NAVIGATION --- */
         nav {
-            background-color: rgba(3, 7, 18, 0.88);
-            padding: 1.2rem 8%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
+            padding: 1.2rem 8%;
+            position: fixed;
             top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--panel-border);
+            width: 100%;
+            z-index: 1000;
+            background: rgba(3, 7, 18, 0.75);
             backdrop-filter: blur(16px);
-            animation: borderRotate 8s infinite linear;
+            border-bottom: 1px solid var(--border-subtle);
         }
 
         .logo {
-            font-family: var(--font-anchor);
-            font-size: 1.8rem;
+            font-family: var(--font-head);
+            font-size: 1.6rem;
             font-weight: 900;
-            color: var(--text-high);
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .logo-icon {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            background: transparent;
-            border: 2px solid var(--cyan);
-            border-radius: 6px;
-            box-shadow: 0 0 15px var(--cyan);
-            animation: floatIcon 3s ease-in-out infinite;
-            position: relative;
-        }
-
-        .logo-icon::before {
-            content: '</>';
-            position: absolute;
-            font-size: 11px;
-            font-weight: bold;
-            color: var(--green);
-            top: 3px;
-            left: 3px;
-        }
-
-        .logo span {
-            color: var(--cyan);
-            text-shadow: 0 0 10px var(--cyan);
+        .logo-box {
+            background: var(--cyan);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 1.2rem;
         }
 
         .nav-links {
-            list-style: none;
             display: flex;
             gap: 2rem;
+            list-style: none;
         }
 
         .nav-links a {
-            color: var(--text-med);
+            color: var(--text-muted);
             text-decoration: none;
-            font-size: 0.88rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            position: relative;
-            padding: 6px 0;
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--cyan), var(--green));
-            transition: width 0.3s ease;
-            box-shadow: 0 0 8px var(--cyan);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .nav-links a:hover {
             color: var(--cyan);
+            text-shadow: 0 0 10px var(--cyan-glow);
         }
 
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        /* Status Badge */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(2, 6, 16, 0.85);
-            border: 1px solid var(--green);
-            padding: 8px 22px;
-            border-radius: 50px;
-            font-size: 0.82rem;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            margin-bottom: 1.8rem;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background-color: var(--green);
-            border-radius: 50%;
-            animation: liveDot 2s infinite;
-        }
-
-        /* Hero Header */
-        header {
-            padding: 5rem 20px 4rem 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            z-index: 10;
-        }
-
-        header h1 {
-            font-family: var(--font-anchor);
-            font-size: clamp(2.8rem, 6.5vw, 5.5rem);
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            line-height: 1.08;
-            margin-bottom: 1.2rem;
-            background: linear-gradient(90deg, #ffffff, var(--cyan), var(--green), #ffffff);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: textShimmer 5s linear infinite;
-            filter: drop-shadow(0 0 25px rgba(0, 243, 255, 0.45));
-        }
-
-        /* TIP 5: Text Opacity Hierarchy */
-        header p {
-            font-size: 1.15rem;
-            margin-bottom: 2.5rem;
-            max-width: 720px;
-            color: var(--text-med);
-            text-shadow: 0 2px 10px rgba(0,0,0,0.9);
-        }
-
-        /* Button Group */
-        .btn-group {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 3.5rem;
-        }
-
-        .btn {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 18px 48px;
-            background: rgba(0, 243, 255, 0.12);
-            color: var(--cyan);
-            text-decoration: none;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-radius: 6px;
-            font-weight: 900;
-            border: 1px solid var(--cyan);
-            cursor: pointer;
-            animation: cyberPulse 3s infinite;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            overflow: hidden;
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.4), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn:hover {
-            transform: translateY(-4px);
-            background: var(--cyan);
-            color: #000;
-            box-shadow: 0 0 35px var(--cyan);
-        }
-
-        /* TIP 2: THE STAR OF THE SHOW - Mainframe Dashboard Graphic */
-        .star-show-container {
-            width: 100%;
-            max-width: 880px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .star-glow-bg {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            height: 70%;
-            background: radial-gradient(ellipse at center, rgba(0, 243, 255, 0.25) 0%, rgba(0, 255, 102, 0.12) 50%, transparent 80%);
-            filter: blur(40px);
-            z-index: -1;
-            animation: pulseGlow 4s infinite ease-in-out;
-        }
-
-        /* TIP 4: Depth & Tangibility (Glassmorphism Frame) */
-        .hero-terminal-card {
-            background: rgba(6, 14, 28, 0.85);
-            border: 1px solid var(--panel-border);
-            border-radius: 12px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.15);
-            padding: 24px;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .terminal-header {
+        .status-pill {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(0, 243, 255, 0.15);
-            padding-bottom: 14px;
-            margin-bottom: 20px;
-        }
-
-        .terminal-dots {
-            display: flex;
             gap: 8px;
-        }
-
-        .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-        }
-        .dot.red { background: #ff5f56; }
-        .dot.yellow { background: #ffbd2e; }
-        .dot.green { background: #27c93f; }
-
-        .terminal-title {
+            background: rgba(0, 255, 102, 0.1);
+            border: 1px solid rgba(0, 255, 102, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-family: var(--font-code);
             font-size: 0.8rem;
-            color: var(--text-low);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .terminal-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        .stat-box {
-            background: rgba(3, 8, 20, 0.7);
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            border-radius: 8px;
-            padding: 16px;
-            position: relative;
-        }
-
-        /* TIP 3: Visual Rhyming with Terminal Symbols */
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--cyan);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 6px;
-        }
-
-        .stat-value {
-            font-family: var(--font-anchor);
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: var(--text-high);
-        }
-
-        .stat-chart-bars {
-            display: flex;
-            align-items: flex-end;
-            gap: 6px;
-            height: 45px;
-            margin-top: 10px;
-        }
-
-        .chart-bar {
-            flex: 1;
-            background: linear-gradient(180deg, var(--cyan), var(--green));
-            border-radius: 2px 2px 0 0;
-            opacity: 0.8;
-            animation: barGrow 3s infinite ease-in-out;
-        }
-
-        .chart-bar:nth-child(2) { animation-delay: 0.3s; }
-        .chart-bar:nth-child(3) { animation-delay: 0.6s; }
-        .chart-bar:nth-child(4) { animation-delay: 0.9s; }
-        .chart-bar:nth-child(5) { animation-delay: 1.2s; }
-
-        /* Section Layout */
-        .section {
-            padding: 6rem 10%;
-            position: relative;
-            z-index: 10;
-        }
-
-        .section-title {
-            font-family: var(--font-anchor);
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 3.5rem;
-            color: var(--text-high);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .section-title span {
             color: var(--green);
-            text-shadow: 0 0 15px var(--green);
         }
 
-        /* Feature Cards */
-        .features-grid {
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--green);
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 255, 102, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0); }
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            padding: 10rem 8% 5rem 8%;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2.5rem;
-        }
-
-        /* TIP 4: Depth & Tangibility Card Design */
-        .feature-card {
-            background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            padding: 3rem 2rem;
-            border-radius: 10px;
-            border: 1px solid var(--panel-border);
-            text-align: left;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 3rem;
+            align-items: center;
             position: relative;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
         }
 
-        .feature-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            width: 0%;
-            background: linear-gradient(90deg, var(--cyan), var(--green));
-            transition: width 0.4s ease;
+        .hero-content {
+            grid-column: span 7;
         }
 
-        .feature-card:hover::after {
-            width: 100%;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--cyan);
-            box-shadow: 0 15px 35px rgba(0, 243, 255, 0.2);
-        }
-
-        .card-icon {
-            font-size: 2.8rem;
-            margin-bottom: 1.2rem;
-            display: inline-block;
-            animation: floatIcon 4s ease-in-out infinite;
-        }
-
-        .feature-card h3 {
-            font-family: var(--font-anchor);
-            font-size: 1.4rem;
-            margin-bottom: 0.8rem;
-            color: var(--text-high);
-            text-transform: uppercase;
+        .season-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 0, 85, 0.15);
+            border: 1px solid var(--pink-accent);
+            color: #ff3377;
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
             letter-spacing: 1px;
         }
 
-        .feature-card p {
-            color: var(--text-med);
-            font-size: 0.95rem;
-        }
-
-        /* System Directives Box */
-        .rules-box {
-            max-width: 850px;
-            margin: 0 auto;
-            background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            padding: 3.5rem;
-            border-radius: 10px;
-            border: 1px solid var(--panel-border);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .rules-box ul {
-            list-style: none;
-        }
-
-        .rules-box li {
-            margin-bottom: 22px;
-            font-size: 1.05rem;
-            position: relative;
-            padding-left: 45px;
-            color: var(--text-med);
-            transition: transform 0.3s ease, color 0.3s ease;
-        }
-
-        .rules-box li:hover {
-            transform: translateX(10px);
-            color: var(--text-high);
-        }
-
-        /* TIP 3: Visual Rhyming with {Code} prefix */
-        .rules-box li::before {
-            content: '{Code}';
-            position: absolute;
-            left: 0;
-            top: 0;
-            font-size: 0.82rem;
-            color: var(--green);
-            font-weight: bold;
-            text-shadow: 0 0 8px var(--green);
-        }
-
-        .cmd-code {
-            color: var(--cyan);
-            background: rgba(0, 243, 255, 0.12);
-            padding: 3px 10px;
-            border-radius: 4px;
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            font-weight: bold;
-        }
-
-        /* Terminal IP Cards */
-        .ip-container {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            margin-top: 35px;
-            margin-bottom: 40px;
-        }
-
-        .ip-box {
-            background: rgba(4, 9, 20, 0.92);
-            backdrop-filter: blur(12px);
-            padding: 28px 40px;
-            border-radius: 10px;
-            min-width: 320px;
-            border: 1px solid var(--panel-border);
-            text-align: left;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            overflow: hidden;
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-        }
-
-        .ip-box:hover {
-            border-color: var(--green);
-            transform: translateY(-6px);
-            box-shadow: 0 12px 35px rgba(0, 255, 102, 0.25);
-        }
-
-        .ip-box span {
-            display: block;
-            color: var(--cyan);
-            font-size: 0.8rem;
+        .hero-title {
+            font-family: var(--font-head);
+            font-size: clamp(3rem, 5.5vw, 5.2rem);
+            font-weight: 900;
+            line-height: 1.05;
             text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-title span {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-leverage-card {
+            grid-column: span 5;
+            background: var(--surface-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 2.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.12);
+            position: relative;
+            transform: translateY(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hero-leverage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 60px rgba(0, 243, 255, 0.25);
+        }
+
+        .card-tag {
+            font-family: var(--font-code);
+            font-size: 0.75rem;
+            color: var(--cyan);
             letter-spacing: 2px;
-            margin-bottom: 8px;
-            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .server-ip-box {
+            background: rgba(3, 7, 18, 0.8);
+            border: 1px dashed var(--cyan);
+            border-radius: 10px;
+            padding: 1.2rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .server-ip-box:hover {
+            background: rgba(0, 243, 255, 0.08);
+            border-style: solid;
+        }
+
+        .ip-label {
+            font-family: var(--font-code);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 4px;
         }
 
         .ip-text {
-            font-family: var(--font-anchor);
-            color: var(--text-high);
-            font-weight: 900;
-            font-size: 1.4rem;
-            letter-spacing: 1px;
-        }
-
-        .ip-port {
+            font-family: var(--font-code);
+            font-size: 1.35rem;
+            font-weight: 800;
             color: var(--green);
-            font-size: 1rem;
-            font-weight: bold;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .click-hint {
-            display: inline-block;
-            margin-top: 12px;
+        .copy-toast {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--cyan);
+            color: #000;
+            font-family: var(--font-code);
+            font-weight: 700;
             font-size: 0.75rem;
-            color: var(--text-low);
+            padding: 4px 12px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .copy-toast.active {
+            opacity: 1;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.9rem;
+            border-radius: 8px;
+            font-family: var(--font-code);
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--cyan-glow);
+        }
+
+        .btn-primary:hover {
+            background: var(--green);
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.5);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--text-muted);
+        }
+
+        /* --- SERVER INFO BAR --- */
+        .info-bar {
+            margin: 0 8% 5rem 8%;
+            background: var(--surface-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.8rem 2.5rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            backdrop-filter: blur(12px);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .info-icon {
+            font-size: 1.8rem;
+            color: var(--cyan);
+        }
+
+        .info-text h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .info-text p {
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* --- FEATURES GRID --- */
+        .features {
+            padding: 4rem 8% 6rem 8%;
+        }
+
+        .section-title {
+            font-family: var(--font-head);
+            font-size: 2.2rem;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-sub {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 2.2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-5px);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 243, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cyan);
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* --- COMMUNITY CTA SECTION --- */
+        .cta-section {
+            margin: 2rem 8% 6rem 8%;
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.08) 0%, rgba(0, 255, 102, 0.05) 100%);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 4rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .cta-section h2 {
+            font-family: var(--font-head);
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2rem auto;
+            font-size: 1.1rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 3rem 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
             transition: color 0.3s ease;
         }
 
-        .ip-box:hover .click-hint {
-            color: var(--green);
+        .footer-links a:hover {
+            color: var(--text-main);
         }
 
-        /* Copy Toast Popup */
-        .copy-toast {
-            position: fixed;
-            bottom: 40px;
-            right: 40px;
-            background: linear-gradient(135deg, var(--cyan), var(--green));
-            color: #000000;
-            padding: 16px 32px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            border-radius: 6px;
-            display: none;
-            box-shadow: 0 10px 30px rgba(0, 243, 255, 0.6);
-            z-index: 1000;
-            animation: floatIcon 2s infinite ease-in-out;
+        /* --- RESPONSIVE BREAKPOINTS --- */
+        @media (max-width: 1024px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            .hero-content { grid-column: span 1; }
+            .hero-leverage-card { grid-column: span 1; }
+            .info-bar { grid-template-columns: repeat(2, 1fr); }
+            .feature-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
-        /* Footer */
-        footer {
-            background-color: rgba(2, 4, 10, 0.95);
-            text-align: center;
-            padding: 3.5rem 2rem;
-            border-top: 1px solid var(--panel-border);
-            position: relative;
-            z-index: 10;
-        }
-
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
+            nav { padding: 1rem 5%; }
             .nav-links { display: none; }
-            .section { padding: 4rem 6%; }
-            .rules-box { padding: 2rem; }
+            .hero { padding: 8rem 5% 3rem 5%; }
+            .info-bar { grid-template-columns: 1fr; gap: 1.5rem; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .cta-section { padding: 2.5rem 1.5rem; }
+            .cta-buttons { flex-direction: column; }
+            footer { flex-direction: column; gap: 1.5rem; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-    <!-- TIP 4: Subtle Scanline & Noise Depth Layer -->
-    <div class="scanline-overlay"></div>
+    <!-- Particle Background Canvas -->
+    <canvas id="particleCanvas"></canvas>
+    <div class="grid-bg"></div>
 
-    <!-- Live Animated Matrix Code Canvas Background -->
-    <canvas id="bg-canvas"></canvas>
-
-    <!-- Copy Notification Toast -->
-    <div id="toast" class="copy-toast">&gt; IP_COPIED_TO_CLIPBOARD</div>
-
-    <!-- Navigation Bar -->
+    <!-- Navigation -->
     <nav>
         <div class="logo">
-            <div class="logo-icon"></div>
-            3C <span>NETWORK</span>
+            <span class="logo-box">3C</span> SMP
         </div>
+        
         <ul class="nav-links">
-            <li><a href="#home">// Home</a></li>
-            <li><a href="#features">// Modules</a></li>
-            <li><a href="#rules">// Directives</a></li>
-            <li><a href="#join">// Connect</a></li>
+            <li><a href="#hero"><i class="fa-solid fa-house"></i> Home</a></li>
+            <li><a href="#features"><i class="fa-solid fa-layer-group"></i> Features</a></li>
+            <li><a href="#connect"><i class="fa-solid fa-server"></i> Server Info</a></li>
+            <li><a href="https://discord.gg/EzcJSQkG6" target="_blank"><i class="fa-brands fa-discord"></i> Discord</a></li>
         </ul>
+
+        <div class="status-pill">
+            <div class="pulse-dot"></div>
+            <span id="playerCount">ONLINE // 128 PLAYERS</span>
+        </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header id="home">
-        <!-- TIP 3: Visual Rhyming with Status Pill Badge -->
-        <div class="status-badge">
-            <div class="status-dot"></div>
-            SYSTEM ONLINE &bull; 139.99.22.6:28810
-        </div>
-        
-        <!-- TIP 1: Headline using Space Grotesk Anchor Font -->
-        <h1>AUTOMATE WEALTH.<br>CODE THE ECONOMY.</h1>
-        <p>A Donut SMP inspired tech-driven economy. Construct automated spawner networks, flip assets on algorithmic markets, and build the ultimate financial mainframe.</p>
+    <!-- HERO SECTION -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <div class="season-badge">
+                <i class="fa-solid fa-fire"></i> SEASON 2 IS NOW LIVE
+            </div>
+            
+            <h1 class="hero-title">
+                Automate Wealth.<br>
+                <span>Rule The Economy.</span>
+            </h1>
+            
+            <p class="hero-desc">
+                Welcome to 3C SMP — a high-performance tech economy network inspired by Donut SMP. Build massive spawner arrays, trade on dynamic auction markets, and dominate the balance top leaderboards.
+            </p>
 
-        <div class="btn-group">
-            <a href="#join" class="btn">&gt; INITIALIZE SESSION</a>
+            <div class="btn-group" style="max-width: 450px;">
+                <a href="#connect" class="btn btn-primary"><i class="fa-solid fa-play"></i> START PLAYING</a>
+                <a href="https://discord.gg/EzcJSQkG6" target="_blank" class="btn btn-secondary"><i class="fa-brands fa-discord"></i> DISCORD</a>
+            </div>
         </div>
 
-        <!-- TIP 2: THE STAR OF THE SHOW (Tech Mainframe Dashboard Element) -->
-        <div class="star-show-container">
-            <div class="star-glow-bg"></div>
-            <div class="hero-terminal-card">
-                <div class="terminal-header">
-                    <div class="terminal-dots">
-                        <div class="dot red"></div>
-                        <div class="dot yellow"></div>
-                        <div class="dot green"></div>
-                    </div>
-                    <div class="terminal-title">3C_MAINFRAME_ECO_MONITOR v2.6</div>
+        <!-- SERVER CONNECT CARD -->
+        <div class="hero-leverage-card" id="connect">
+            <div class="card-tag">
+                <span>// QUICK CONNECT</span>
+                <span>JAVA & BEDROCK</span>
+            </div>
+
+            <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">Join Server Network</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Click below to instantly copy the server IP address to your clipboard.</p>
+
+            <div class="server-ip-box" onclick="copyServerIp('139.99.22.6:28810')">
+                <div class="ip-label">CLICK TO COPY SERVER ADDRESS</div>
+                <div class="ip-text">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>139.99.22.6:28810</span>
                 </div>
-                <div class="terminal-grid">
-                    <div class="stat-box">
-                        <div class="stat-label">// GLOBAL AH COMMERCE</div>
-                        <div class="stat-value">$1,429,800</div>
-                        <div class="stat-chart-bars">
-                            <div class="chart-bar"></div>
-                            <div class="chart-bar"></div>
-                            <div class="chart-bar"></div>
-                            <div class="chart-bar"></div>
-                            <div class="chart-bar"></div>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">// ACTIVE SPAWNER NODES</div>
-                        <div class="stat-value">8,942 / sec</div>
-                        <div class="stat-chart-bars">
-                            <div class="chart-bar" style="background: var(--green);"></div>
-                            <div class="chart-bar" style="background: var(--green);"></div>
-                            <div class="chart-bar" style="background: var(--green);"></div>
-                            <div class="chart-bar" style="background: var(--green);"></div>
-                            <div class="chart-bar" style="background: var(--green);"></div>
-                        </div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">// MARKET INDEX</div>
-                        <div class="stat-value">+14.8%</div>
-                        <div style="font-size: 0.75rem; color: var(--green); margin-top: 15px;">▲ AUTOMATED BALTOP SYNC</div>
-                    </div>
-                </div>
+                <div class="copy-toast" id="copyToast">✓ IP COPIED TO CLIPBOARD!</div>
             </div>
-        </div>
-    </header>
 
-    <!-- Features Section -->
-    <section id="features" class="section">
-        <h2 class="section-title">Core <span>Modules</span></h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="card-icon">💻</div>
-                <h3>Algorithmic AH & Shops</h3>
-                <p>Run high-speed player markets, list items on the global auction house, and dominate player-driven automated commerce.</p>
-            </div>
-            <div class="feature-card">
-                <div class="card-icon">⚡</div>
-                <h3>Automated Spawner Farms</h3>
-                <p>Deploy, stack, and optimize mob spawner farms. Scale up production lines to generate millions in virtual balance.</p>
-            </div>
-            <div class="feature-card">
-                <div class="card-icon">📊</div>
-                <h3>Live Data Leaderboards</h3>
-                <p>Track top wealth statistics in real-time with /baltop metrics and climb the server's balance hierarchy.</p>
+            <div style="font-family: var(--font-code); font-size: 0.75rem; color: var(--text-dim); display: flex; justify-content: space-between;">
+                <span>JAVA PORT: 28810</span>
+                <span>BEDROCK PORT: 28810</span>
             </div>
         </div>
     </section>
 
-    <!-- Rules / Directives Section -->
-    <section id="rules" class="section">
-        <h2 class="section-title">System <span>Directives</span></h2>
-        <div class="rules-box">
-            <ul>
-                <li><strong>CASUAL ECONOMY SMP:</strong> Non-hardcore environment. Keep your inventory, build freely, and focus on expanding your market.</li>
-                <li><strong>ZERO EXPLOIT POLICY:</strong> Duplication glitches or market manipulation hacks will trigger an immediate auto-ban.</li>
-                <li><strong>COMMUNITY PROTOCOL:</strong> Respectful behavior required.</li>
-                <li><strong>SHOP:</strong> Use <span class="cmd-code">/eco</span> to open the main economy menu.</li>
-            </ul>
+    <!-- SERVER COMPATIBILITY BAR -->
+    <section class="info-bar">
+        <div class="info-item">
+            <i class="fa-solid fa-laptop-code info-icon"></i>
+            <div class="info-text">
+                <h4>Java Edition</h4>
+                <p>Support: 1.19.x - 1.20.x</p>
+            </div>
+        </div>
+
+        <div class="info-item">
+            <i class="fa-solid fa-mobile-screen-button info-icon" style="color: var(--green);"></i>
+            <div class="info-text">
+                <h4>Bedrock Edition</h4>
+                <p>Port: 28810</p>
+            </div>
+        </div>
+
+        <div class="info-item">
+            <i class="fa-solid fa-bolt info-icon" style="color: var(--gold);"></i>
+            <div class="info-text">
+                <h4>Low Latency</h4>
+                <p>24/7 High Performance</p>
+            </div>
+        </div>
+
+        <div class="info-item">
+            <i class="fa-solid fa-shield-halved info-icon" style="color: var(--pink-accent);"></i>
+            <div class="info-text">
+                <h4>Grief Protection</h4>
+                <p>Advanced Claims</p>
+            </div>
         </div>
     </section>
 
-    <!-- Join / Connect Section -->
-    <section id="join" class="section" style="text-align: center;">
-        <h2 class="section-title">Network <span>Endpoints</span></h2>
-        <p style="font-size: 1rem; color: var(--text-med); max-width: 600px; margin: 0 auto;">
-            Select a target terminal endpoint below to copy the connection protocol directly to your clipboard.
-        </p>
+    <!-- FEATURE MODULES SECTION -->
+    <section class="features" id="features">
+        <h2 class="section-title">Core Network Modules</h2>
+        <p class="section-sub">Engineered for players who love automation, grinding, and economy dominance.</p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-industry"></i></div>
+                <h3>Spawner Automation</h3>
+                <p>Stack spawners, design high-volume mob farms, and automate item sorting systems to generate millions in passive income.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="color: var(--green); background: rgba(0, 255, 102, 0.1);"><i class="fa-solid fa-chart-line"></i></div>
+                <h3>Real-Time Auction House</h3>
+                <p>Trade rare items, gear, and resources on an open player-driven auction house. Flip items and outsmart the economy.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="color: var(--gold); background: rgba(255, 183, 0, 0.1);"><i class="fa-solid fa-trophy"></i></div>
+                <h3>Baltop Leaderboards</h3>
+                <p>Compete on the live server balance top rankings. Track your wealth and flexing status across the entire community.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-crosshairs"></i></div>
+                <h3>Player PvP & Arena</h3>
+                <p>Test your gear in customized PvP zones and combat arenas where high risk brings high reward.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="color: var(--green); background: rgba(0, 255, 102, 0.1);"><i class="fa-solid fa-cubes-stacked"></i></div>
+                <h3>Cross-Play Enabled</h3>
+                <p>Seamlessly connect with friends playing on Java Edition, Windows 10, iOS, Android, or Console.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="color: var(--pink-accent); background: rgba(255, 0, 85, 0.1);"><i class="fa-solid fa-gem"></i></div>
+                <h3>Custom Ranks & Perks</h3>
+                <p>Unlock cosmetic titles, exclusive vault spaces, and utility perks through playtime and in-game progression.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMMUNITY CTA -->
+    <section class="cta-section" id="community">
+        <h2>Ready To Dominate 3C SMP?</h2>
+        <p>Join over 2,000+ registered community members on Discord. Stay updated on updates, events, and economic giveaways.</p>
         
-        <div class="ip-container">
-            <!-- Java IP -->
-            <div class="ip-box" onclick="copyToClipboard('139.99.22.6:28810')">
-                <span>// JAVA PROTOCOL</span>
-                <div class="ip-text">139.99.22.6<span class="ip-port">:28810</span></div>
-                <div class="click-hint">[ Click to Copy IP ]</div>
-            </div>
-
-            <!-- Bedrock IP -->
-            <div class="ip-box" onclick="copyToClipboard('139.99.22.6')">
-                <span>// BEDROCK PROTOCOL</span>
-                <div class="ip-text">139.99.22.6</div>
-                <div class="ip-port" style="margin-top: 5px;">PORT: 28810</div>
-                <div class="click-hint">[ Click to Copy IP ]</div>
-            </div>
+        <div class="cta-buttons">
+            <button class="btn btn-primary" onclick="copyServerIp('139.99.22.6:28810')">
+                <i class="fa-solid fa-server"></i> COPY SERVER IP
+            </button>
+            <a href="https://discord.gg/EzcJSQkG6" target="_blank" class="btn btn-secondary">
+                <i class="fa-brands fa-discord"></i> JOIN DISCORD
+            </a>
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- FOOTER -->
     <footer>
-        <p style="color: var(--text-high); font-weight: bold;">&copy; 2026 3C TECH SMP NETWORK. ALL SYSTEMS OPERATIONAL.</p>
-        <p style="font-size: 0.85rem; color: var(--text-low); margin-top: 8px;">Not affiliated with or endorsed by Mojang AB or Microsoft.</p>
+        <div>
+            © 2026 3C SMP Network. All Rights Reserved. Not affiliated with Mojang or Microsoft.
+        </div>
+        <ul class="footer-links">
+            <li><a href="#hero">Back to Top</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#connect">Connect</a></li>
+            <li><a href="https://discord.gg/EzcJSQkG6" target="_blank">Discord</a></li>
+        </ul>
     </footer>
 
-    <!-- JS Canvas Script (Moving Matrix Rain Background) -->
+    <!-- INTERACTIVE JAVASCRIPT -->
     <script>
-        const canvas = document.getElementById('bg-canvas');
+        function copyServerIp(ipAddress) {
+            navigator.clipboard.writeText(ipAddress).then(() => {
+                const toast = document.getElementById('copyToast');
+                toast.classList.add('active');
+                setTimeout(() => {
+                    toast.classList.remove('active');
+                }, 2200);
+            }).catch(err => {
+                console.error('Failed to copy IP: ', err);
+            });
+        }
+
+        const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
 
         function resizeCanvas() {
@@ -842,49 +748,50 @@
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        // Code Stream Character Set
-        const charSet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>/$#{}=+*:;3C_';
-        const fontSize = 15;
-        let columns = Math.floor(canvas.width / fontSize);
-        let drops = Array(columns).fill(1);
+        const particles = [];
+        const particleCount = 45;
 
-        function drawMatrix() {
-            ctx.fillStyle = 'rgba(2, 4, 10, 0.18)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.speedY = (Math.random() - 0.5) * 0.4;
+                this.opacity = Math.random() * 0.5 + 0.1;
+            }
 
-            ctx.font = `${fontSize}px monospace`;
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
 
-            for (let i = 0; i < drops.length; i++) {
-                const text = charSet.charAt(Math.floor(Math.random() * charSet.length));
-                
-                if (Math.random() > 0.85) {
-                    ctx.fillStyle = '#00ff66';
-                } else if (Math.random() > 0.96) {
-                    ctx.fillStyle = '#ffffff';
-                } else {
-                    ctx.fillStyle = '#00f3ff';
-                }
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
 
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
+            draw() {
+                ctx.fillStyle = `rgba(0, 243, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
             }
         }
 
-        setInterval(drawMatrix, 33);
-
-        // Click-to-Copy Function
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text);
-            const toast = document.getElementById('toast');
-            toast.style.display = 'block';
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 2500);
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
         }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
     </script>
 </body>
 </html>
