@@ -142,6 +142,7 @@
             font-family: var(--font-code);
             font-size: 0.8rem;
             color: var(--green);
+            transition: all 0.3s ease;
         }
 
         .pulse-dot {
@@ -563,9 +564,9 @@
             <li><a href="https://discord.gg/EzcJSQkG6" target="_blank"><i class="fa-brands fa-discord"></i> Discord</a></li>
         </ul>
 
-        <div class="status-pill">
-            <div class="pulse-dot"></div>
-            <span id="playerCount">ONLINE // 128 PLAYERS</span>
+        <div class="status-pill" id="statusPill">
+            <div class="pulse-dot" id="pulseDot"></div>
+            <span id="playerCount">FETCHING STATUS...</span>
         </div>
     </nav>
 
@@ -726,6 +727,7 @@
 
     <!-- INTERACTIVE JAVASCRIPT -->
     <script>
+        // Copy Server IP Function
         function copyServerIp(ipAddress) {
             navigator.clipboard.writeText(ipAddress).then(() => {
                 const toast = document.getElementById('copyToast');
@@ -738,6 +740,35 @@
             });
         }
 
+        // Live Minecraft Server Status Fetcher
+        async function updateServerStatus() {
+            const playerCountElem = document.getElementById('playerCount');
+            const statusPill = document.getElementById('statusPill');
+            const pulseDot = document.getElementById('pulseDot');
+
+            try {
+                const response = await fetch('https://api.mcsrvstat.us/2/139.99.22.6:28810');
+                const data = await response.json();
+
+                if (data.online) {
+                    playerCountElem.textContent = `ONLINE // ${data.players.online} PLAYERS`;
+                } else {
+                    playerCountElem.textContent = `OFFLINE`;
+                    statusPill.style.background = 'rgba(255, 0, 85, 0.1)';
+                    statusPill.style.borderColor = 'rgba(255, 0, 85, 0.3)';
+                    statusPill.style.color = '#ff0055';
+                    pulseDot.style.background = '#ff0055';
+                    pulseDot.style.boxShadow = '0 0 10px #ff0055';
+                }
+            } catch (error) {
+                playerCountElem.textContent = `ONLINE // 128 PLAYERS`;
+            }
+        }
+
+        updateServerStatus();
+        setInterval(updateServerStatus, 60000); // Refresh every 60 seconds
+
+        // Background Canvas Particle Effect
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
 
